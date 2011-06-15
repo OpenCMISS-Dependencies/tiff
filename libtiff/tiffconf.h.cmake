@@ -8,83 +8,82 @@
 #define _TIFFCONF_
 
 /* Define to 1 if the system has the type `int16'. */
-/* #undef HAVE_INT16 */
+#cmakedefine HAVE_INT16 1
 
 /* Define to 1 if the system has the type `int32'. */
-/* #undef HAVE_INT32 */
+#cmakedefine HAVE_INT32 1
 
 /* Define to 1 if the system has the type `int8'. */
-/* #undef HAVE_INT8 */
+#cmakedefine HAVE_INT8 1
 
 /* The size of a `int', as computed by sizeof. */
-#define SIZEOF_INT 4
+#cmakedefine SIZEOF_INT ${SIZEOF_INT}
 
 /* The size of a `long', as computed by sizeof. */
-#define SIZEOF_LONG 4
+#cmakedefine SIZEOF_LONG ${SIZEOF_LONG}
 
 /* Compatibility stuff. */
 
 /* Define as 0 or 1 according to the floating point format suported by the
    machine */
-#define HAVE_IEEEFP 1
+#cmakedefine01 HAVE_IEEEFP
 
 /* Set the native cpu bit order (FILLORDER_LSB2MSB or FILLORDER_MSB2LSB) */
-#define HOST_FILLORDER FILLORDER_LSB2MSB
+#cmakedefine HOST_FILLORDER ${HOST_FILLORDER}
 
 /* Native cpu byte order: 1 if big-endian (Motorola) or 0 if little-endian
    (Intel) */
-#define HOST_BIGENDIAN 0
+#cmakedefine01 HOST_BIGENDIAN
 
 /* Support CCITT Group 3 & 4 algorithms */
-#define CCITT_SUPPORT 1
+#cmakedefine CCITT_SUPPORT 1
 
 /* Support JPEG compression (requires IJG JPEG library) */
-/* #undef JPEG_SUPPORT */
+#cmakedefine JPEG_SUPPORT 1
 
 /* Support LogLuv high dynamic range encoding */
-#define LOGLUV_SUPPORT 1
+#cmakedefine LOGLUV_SUPPORT 1
 
 /* Support LZW algorithm */
-#define LZW_SUPPORT 1
+#cmakedefine LZW_SUPPORT 1
 
 /* Support NeXT 2-bit RLE algorithm */
-#define NEXT_SUPPORT 1
+#cmakedefine NEXT_SUPPORT 1
 
 /* Support Old JPEG compresson (read contrib/ojpeg/README first! Compilation
    fails with unpatched IJG JPEG library) */
-/* #undef OJPEG_SUPPORT */
+#cmakedefine OJPEG_SUPPORT 1
 
 /* Support Macintosh PackBits algorithm */
-#define PACKBITS_SUPPORT 1
+#cmakedefine PACKBITS_SUPPORT 1
 
 /* Support Pixar log-format algorithm (requires Zlib) */
-/* #undef PIXARLOG_SUPPORT */
+#cmakedefine PIXARLOG_SUPPORT 1
 
 /* Support ThunderScan 4-bit RLE algorithm */
-#define THUNDER_SUPPORT 1
+#cmakedefine THUNDER_SUPPORT 1
 
 /* Support Deflate compression */
-#cmakedefine ZIP_SUPPORT
+#cmakedefine ZIP_SUPPORT 1
 
 /* Support strip chopping (whether or not to convert single-strip uncompressed
    images to mutiple strips of ~8Kb to reduce memory usage) */
-#define STRIPCHOP_DEFAULT TIFF_STRIPCHOP
+#cmakedefine STRIPCHOP_DEFAULT ${STRIPCHOP_DEFAULT}
 
 /* Enable SubIFD tag (330) support */
-#define SUBIFD_SUPPORT 1
+#cmakedefine SUBIFD_SUPPORT 1
 
 /* Treat extra sample as alpha (default enabled). The RGBA interface will
    treat a fourth sample with no EXTRASAMPLE_ value as being ASSOCALPHA. Many
    packages produce RGBA files but don't mark the alpha properly. */
-#define DEFAULT_EXTRASAMPLE_AS_ALPHA 1
+#cmakedefine DEFAULT_EXTRASAMPLE_AS_ALPHA 1
 
 /* Pick up YCbCr subsampling info from the JPEG data stream to support files
    lacking the tag (default enabled). */
-#define CHECK_JPEG_YCBCR_SUBSAMPLING 1
+#cmakedefine CHECK_JPEG_YCBCR_SUBSAMPLING 1
 
-/* Which type of file IO to use on windows */
-#cmakedefine USE_WIN32_FILEIO 1
-#cmakedefine AVOID_WIN32_FILEIO 1
+/* Support MS MDI magic number files as TIFF */
+#cmakedefine MDI_SUPPORT 1
 
 /*
  * Feature support definitions.
