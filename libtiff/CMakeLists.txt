@@ -164,7 +164,7 @@ IF( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL
 		tif_error.c tif_fax3.c tif_getimage.c tif_jpeg.c tif_luv.c tif_lzw.c tif_next.c
 		tif_open.c tif_packbits.c tif_pixarlog.c tif_predict.c tif_read.c
 		tif_swab.c tif_strip.c tif_thunder.c tif_tile.c tif_version.c tif_warning.c
-		tif_write.c tif_zip.c tif_unix.c
+		tif_write.c tif_zip.c tif_unix.c tif_flush.c tif_color.c
 		PROPERTIES COMPILE_FLAGS "-fPIC" )
 ENDIF( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64" )
 
