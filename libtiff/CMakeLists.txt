@@ -158,6 +158,16 @@ IF( WIN32 AND NOT ${TIFF_NAMESPACE_NAME}_BUILD_STATIC_LIB )
 		libtiff.def )
 ENDIF( WIN32 AND NOT ${TIFF_NAMESPACE_NAME}_BUILD_STATIC_LIB )
 
+IF( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64" )
+	SET_SOURCE_FILES_PROPERTIES( tif_aux.c tif_close.c tif_codec.c tif_compress.c
+		tif_dir.c tif_dirinfo.c tif_dirread.c tif_dirwrite.c tif_dumpmode.c
+		tif_error.c tif_fax3.c tif_getimage.c tif_jpeg.c tif_luv.c tif_lzw.c tif_next.c
+		tif_open.c tif_packbits.c tif_pixarlog.c tif_predict.c tif_read.c
+		tif_swab.c tif_strip.c tif_thunder.c tif_tile.c tif_version.c tif_warning.c
+		tif_write.c tif_zip.c tif_unix.c
+		PROPERTIES COMPILE_FLAGS "-fPIC" )
+ENDIF( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64" )
+
 # Best to use 'Header Files' and 'Source Files' because any ungrouped files will be placed there by default
 SOURCE_GROUP( "Header Files\\" FILES ${PUBLIC_HDRS} ) 
 SOURCE_GROUP( "Header Files\\" FILES ${PRIVATE_HDRS} ) 
