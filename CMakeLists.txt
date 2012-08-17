@@ -40,6 +40,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
 
 # Set this nampspace to keep these options seperate from other project options
 SET( TIFF_NAMESPACE_NAME TIFF )
+PROJECT( tiff )
 
 MACRO( OPTION_WITH_DEFAULT OPTION_NAME OPTION_STRING OPTION_DEFAULT )
 	IF( NOT DEFINED ${OPTION_NAME} )
