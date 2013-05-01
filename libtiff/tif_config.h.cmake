@@ -414,12 +414,8 @@
 #endif
 
 /* Define to `long' if <sys/types.h> does not define. */
-#ifndef off_t
 #cmakedefine off_t ${offt}
-#endif
 
 /* Define to `unsigned' if <sys/types.h> does not define. */
-#ifndef size_t
 #cmakedefine size_t ${size_t}
-#endif
 
