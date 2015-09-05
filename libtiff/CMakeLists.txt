@@ -110,12 +110,20 @@ else()
   list(APPEND tiff_SOURCES tif_unix.c)
 endif()
 
+# Extra for link errors due to missing contrib/pds
+#set(contrib_pds
+#    ${PROJECT_SOURCE_DIR}/contrib/pds/tif_imageiter.c
+#    ${PROJECT_SOURCE_DIR}/contrib/pds/tif_pdsdirread.c
+#    ${PROJECT_SOURCE_DIR}/contrib/pds/tif_pdsdirwrite.c
+#)
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_BINARY_DIR}
-                    ${TIFF_INCLUDES})
+                    ${TIFF_INCLUDES}
+                    ${PROJECT_SOURCE_DIR}/contrib/pds/)
 
 add_library(tiff SHARED ${tiff_SOURCES} ${tiff_HEADERS} ${nodist_tiff_HEADERS}
-            ${tiff_port_SOURCES} libtiff.def)
+            ${tiff_port_SOURCES} libtiff.def ${contrib_pds})
 target_link_libraries(tiff ${TIFF_LIBRARY_DEPS})
 set_target_properties(tiff PROPERTIES SOVERSION ${SO_COMPATVERSION})
 if(NOT CYGWIN)
@@ -139,9 +147,11 @@ if (NOT WIN32)
 endif()
 
 install(TARGETS tiff tiff_static
+        EXPORT tiff-config
         RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
+        INCLUDES DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
 
 install(FILES ${tiff_HEADERS} ${nodist_tiff_HEADERS}
         DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
@@ -171,9 +181,11 @@ if(cxx)
   endif()
 
   install(TARGETS tiffxx tiffxx_static
+          EXPORT tiff-config
           RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
           LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-          ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR})
+          ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
+          INCLUDES DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
 
   install(FILES ${tiffxx_HEADERS}
           DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}")

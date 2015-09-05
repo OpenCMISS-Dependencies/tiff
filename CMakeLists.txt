@@ -412,8 +412,7 @@ else()
 endif()
 
 # IEEE floating point
-set(HAVE_IEEEFP 1 CACHE STRING "IEEE floating point is available")
-mark_as_advanced(HAVE_IEEEFP)
+set(HAVE_IEEEFP 1)
 
 report_values(CMAKE_HOST_SYSTEM_PROCESSOR HOST_FILLORDER
               HOST_BIG_ENDIAN HAVE_IEEEFP)
@@ -456,7 +455,7 @@ set(MDI_SUPPORT ${mdi})
 # ZLIB
 option(zlib "use zlib (required for Deflate compression)" ON)
 if (zlib)
-  find_package(ZLIB)
+  find_package(ZLIB ${ZLIB_VERSION} REQUIRED)
 endif()
 set(ZLIB_SUPPORT 0)
 if(ZLIB_FOUND)
@@ -477,7 +476,7 @@ endif()
 # JPEG
 option(jpeg "use libjpeg (required for JPEG compression)" ON)
 if (jpeg)
-  find_package(JPEG)
+  find_package(JPEG ${JPEG_VERSION} REQUIRED)
 endif()
 set(JPEG_SUPPORT FALSE)
 if(JPEG_FOUND)
@@ -531,8 +530,7 @@ if(LIBLZMA_FOUND)
 endif()
 
 # 8/12-bit jpeg mode
-option(jpeg12 "enable libjpeg 8/12-bit dual mode (requires separate
-12-bit libjpeg build)" ON)
+option(jpeg12 "enable libjpeg 8/12-bit dual mode (requires separate 12-bit libjpeg build)" OFF)
 set(JPEG12_INCLUDE_DIR JPEG12_INCLUDE_DIR-NOTFOUND CACHE PATH "Include directory for 12-bit libjpeg")
 set(JPEG12_LIBRARY JPEG12_LIBRARY-NOTFOUND CACHE FILEPATH "12-bit libjpeg library")
 set(JPEG12_FOUND FALSE)
@@ -629,12 +627,6 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libtiff-4.pc
         DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig")
 
 # Includes used by libtiff (and tests)
-if(ZLIB_INCLUDE_DIRS)
-  list(APPEND TIFF_INCLUDES ${ZLIB_INCLUDE_DIRS})
-endif()
-if(JPEG_INCLUDE_DIR)
-  list(APPEND TIFF_INCLUDES ${JPEG_INCLUDE_DIR})
-endif()
 if(JPEG12_INCLUDE_DIR)
   list(APPEND TIFF_INCLUDES ${JPEG12_INCLUDE_DIR})
 endif()
@@ -650,11 +642,11 @@ set(TIFF_LIBRARY_DEPS)
 if(M_LIBRARY)
   list(APPEND TIFF_LIBRARY_DEPS ${M_LIBRARY})
 endif()
-if(ZLIB_LIBRARIES)
-  list(APPEND TIFF_LIBRARY_DEPS ${ZLIB_LIBRARIES})
+if(ZLIB_FOUND)
+  list(APPEND TIFF_LIBRARY_DEPS zlib)
 endif()
-if(JPEG_LIBRARIES)
-  list(APPEND TIFF_LIBRARY_DEPS ${JPEG_LIBRARIES})
+if(JPEG_FOUND)
+  list(APPEND TIFF_LIBRARY_DEPS jpeg)
 endif()
 if(JPEG12_LIBRARIES)
   list(APPEND TIFF_LIBRARY_DEPS ${JPEG12_LIBRARIES})
@@ -712,3 +704,27 @@ message(STATUS "")
 # message(STATUS "  X Athena Widgets support:           ${HAVE_XAW}")
 message(STATUS "  OpenGL support:                     ${HAVE_OPENGL}")
 message(STATUS "")
+
+install(
+    EXPORT tiff-config
+    DESTINATION ${PACKAGE_CONFIG_DIR}
+)
+include(CMakePackageConfigHelpers)
+WRITE_BASIC_PACKAGE_VERSION_FILE(${CMAKE_CURRENT_BINARY_DIR}/tiff-config-version.cmake
+    COMPATIBILITY AnyNewerVersion)
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/tiff-config-dependencies.cmake 
+    "include(CMakeFindDependencyMacro)\r\n"
+	"set(${PROJECT_NAME}_IMPORT_PREFIX \${_IMPORT_PREFIX})\r\n"
+)
+if(ZLIB_FOUND)
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/tiff-config-dependencies.cmake "find_dependency(ZLIB)\r\n")
+endif()
+if(JPEG_FOUND)
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/tiff-config-dependencies.cmake "find_dependency(JPEG)\r\n")
+endif()
+file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/tiff-config-dependencies.cmake "set(_IMPORT_PREFIX \${${PROJECT_NAME}_IMPORT_PREFIX})")    
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/tiff-config-version.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/tiff-config-dependencies.cmake
+    DESTINATION ${PACKAGE_CONFIG_DIR}
+)
