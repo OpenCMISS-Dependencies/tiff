@@ -1,4 +1,4 @@
-/* $Id: rgb2ycbcr.c,v 1.9 2004/09/03 07:57:13 dron Exp $ */
+/* $Id: rgb2ycbcr.c,v 1.16 2015-06-21 01:09:10 bfriesen Exp $ */
 
 /*
  * Copyright (c) 1991-1997 Sam Leffler
@@ -34,6 +34,11 @@
 # include <unistd.h>
 #endif
 
+#ifdef NEED_LIBPORT
+# include "libport.h"
+#endif
+
+#include "tiffiop.h"
 #include "tiffio.h"
 
 #define	streq(a,b)	(strcmp(a,b) == 0)
@@ -67,8 +72,10 @@ main(int argc, char* argv[])
 {
 	TIFF *in, *out;
 	int c;
+#if !HAVE_DECL_OPTARG
 	extern int optind;
 	extern char *optarg;
+#endif
 
 	while ((c = getopt(argc, argv, "c:h:r:v:z")) != -1)
 		switch (c) {
@@ -254,6 +261,7 @@ cvtRaster(TIFF* tif, uint32* raster, uint32 width, uint32 height)
 	cc = rnrows*rwidth +
 	    2*((rnrows*rwidth) / (horizSubSampling*vertSubSampling));
 	buf = (unsigned char*)_TIFFmalloc(cc);
+	// FIXME unchecked malloc
 	for (y = height; (int32) y > 0; y -= nrows) {
 		uint32 nr = (y > nrows ? nrows : y);
 		cvtStrip(buf, raster + (y-1)*width, nr, width);
@@ -278,14 +286,32 @@ tiffcvt(TIFF* in, TIFF* out)
 	float floatv;
 	char *stringv;
 	uint32 longv;
+	int result;
+	size_t pixel_count;
 
 	TIFFGetField(in, TIFFTAG_IMAGEWIDTH, &width);
 	TIFFGetField(in, TIFFTAG_IMAGELENGTH, &height);
-	raster = (uint32*)_TIFFmalloc(width * height * sizeof (uint32));
-	if (raster == 0) {
-		TIFFError(TIFFFileName(in), "No space for raster buffer");
-		return (0);
-	}
+	pixel_count = width * height;
+
+ 	/* XXX: Check the integer overflow. */
+ 	if (!width || !height || pixel_count / width != height) {
+ 		TIFFError(TIFFFileName(in),
+ 			  "Malformed input file; "
+ 			  "can't allocate buffer for raster of %lux%lu size",
+ 			  (unsigned long)width, (unsigned long)height);
+ 		return 0;
+ 	}
+ 
+ 	raster = (uint32*)_TIFFCheckMalloc(in, pixel_count, sizeof(uint32),
+ 					   "raster buffer");
+  	if (raster == 0) {
+ 		TIFFError(TIFFFileName(in),
+ 			  "Failed to allocate buffer (%lu elements of %lu each)",
+ 			  (unsigned long)pixel_count,
+ 			  (unsigned long)sizeof(uint32));
+  		return (0);
+  	}
+
 	if (!TIFFReadRGBAImage(in, width, height, raster, 0)) {
 		_TIFFfree(raster);
 		return (0);
@@ -308,7 +334,8 @@ tiffcvt(TIFF* in, TIFF* out)
 	TIFFSetField(out, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 	{ char buf[2048];
 	  char *cp = strrchr(TIFFFileName(in), '/');
-	  sprintf(buf, "YCbCr conversion of %s", cp ? cp+1 : TIFFFileName(in));
+	  snprintf(buf, sizeof(buf), "YCbCr conversion of %s",
+		   cp ? cp+1 : TIFFFileName(in));
 	  TIFFSetField(out, TIFFTAG_IMAGEDESCRIPTION, buf);
 	}
 	TIFFSetField(out, TIFFTAG_SOFTWARE, TIFFGetVersion());
@@ -322,7 +349,9 @@ tiffcvt(TIFF* in, TIFF* out)
 	rowsperstrip = TIFFDefaultStripSize(out, rowsperstrip);
 	TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, rowsperstrip);
 
-	return (cvtRaster(out, raster, width, height));
+	result = cvtRaster(out, raster, width, height);
+        _TIFFfree(raster);
+        return result;
 }
 
 char* stuff[] = {
@@ -355,3 +384,10 @@ usage(int code)
 }
 
 /* vim: set ts=8 sts=8 sw=8 noet: */
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 8
+ * fill-column: 78
+ * End:
+ */

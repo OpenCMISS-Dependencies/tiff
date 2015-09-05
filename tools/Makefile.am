@@ -26,7 +26,9 @@
 LIBPORT = $(top_builddir)/port/libport.la
 LIBTIFF = $(top_builddir)/libtiff/libtiff.la
 
-EXTRA_DIST = Makefile.vc
+EXTRA_DIST = \
+	CMakeLists.txt \
+	Makefile.vc
 
 bin_PROGRAMS = \
 	bmp2tiff \
@@ -45,6 +47,7 @@ bin_PROGRAMS = \
 	tiff2rgba \
 	tiffcmp \
 	tiffcp \
+	tiffcrop \
 	tiffdither \
 	tiffdump \
 	tiffinfo \
@@ -109,6 +112,9 @@ tiffcmp_LDADD = $(LIBTIFF) $(LIBPORT)
 tiffcp_SOURCES = tiffcp.c
 tiffcp_LDADD = $(LIBTIFF) $(LIBPORT)
 
+tiffcrop_SOURCES = tiffcrop.c
+tiffcrop_LDADD = $(LIBTIFF) $(LIBPORT)
+
 tiffdither_SOURCES = tiffdither.c
 tiffdither_LDADD = $(LIBTIFF) $(LIBPORT)
 
@@ -131,7 +137,7 @@ tiffgt_SOURCES = tiffgt.c
 tiffgt_CFLAGS = $(CFLAGS) $(GLUT_CFLAGS) $(AM_CFLAGS)
 tiffgt_LDADD = $(LIBTIFF) $(LIBPORT) $(X_LIBS) $(GLUT_LIBS)
 
-INCLUDES = -I$(top_srcdir)/libtiff
+AM_CPPFLAGS = -I$(top_srcdir)/libtiff
 
 echo:
 	(echo $(CFLAGS))

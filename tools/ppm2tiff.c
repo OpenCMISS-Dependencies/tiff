@@ -1,4 +1,4 @@
-/* $Id: ppm2tiff.c,v 1.12 2006/03/01 10:41:24 dron Exp $ */
+/* $Id: ppm2tiff.c,v 1.19 2015-06-21 01:09:10 bfriesen Exp $ */
 
 /*
  * Copyright (c) 1991-1997 Sam Leffler
@@ -35,16 +35,22 @@
 # include <unistd.h>
 #endif
 
+#ifdef HAVE_FCNTL_H
+# include <fcntl.h>
+#endif
+
+#ifdef HAVE_IO_H
+# include <io.h>
+#endif
+
+#ifdef NEED_LIBPORT
+# include "libport.h"
+#endif
+
 #include "tiffio.h"
 
 #ifndef HAVE_GETOPT
 extern int getopt(int, char**, char*);
-#endif
-
-#if defined(_WINDOWS) || defined(MSDOS)
-#define BINMODE "b"
-#else
-#define	BINMODE
 #endif
 
 #define	streq(a,b)	(strcmp(a,b) == 0)
@@ -66,6 +72,17 @@ BadPPM(char* file)
 	exit(-2);
 }
 
+static tmsize_t
+multiply_ms(tmsize_t m1, tmsize_t m2)
+{
+	tmsize_t bytes = m1 * m2;
+
+	if (m1 && bytes / m1 != m2)
+		bytes = 0;
+
+	return bytes;
+}
+
 int
 main(int argc, char* argv[])
 {
@@ -73,7 +90,7 @@ main(int argc, char* argv[])
 	uint32 rowsperstrip = (uint32) -1;
 	double resolution = -1;
 	unsigned char *buf = NULL;
-	tsize_t linebytes = 0;
+	tmsize_t linebytes = 0;
 	uint16 spp = 1;
 	uint16 bpp = 8;
 	TIFF *out;
@@ -81,8 +98,11 @@ main(int argc, char* argv[])
 	unsigned int w, h, prec, row;
 	char *infile;
 	int c;
+#if !HAVE_DECL_OPTARG
 	extern int optind;
 	extern char* optarg;
+#endif
+	tmsize_t scanline_size;
 
 	if (argc < 2) {
 	    fprintf(stderr, "%s: Too few arguments\n", argv[0]);
@@ -116,7 +136,7 @@ main(int argc, char* argv[])
 	 */
 	if (argc - optind > 1) {
 		infile = argv[optind++];
-		in = fopen(infile, "r" BINMODE);
+		in = fopen(infile, "rb");
 		if (in == NULL) {
 			fprintf(stderr, "%s: Can not open.\n", infile);
 			return (-1);
@@ -124,6 +144,9 @@ main(int argc, char* argv[])
 	} else {
 		infile = "<stdin>";
 		in = stdin;
+#if defined(HAVE_SETMODE) && defined(O_BINARY)
+		setmode(fileno(stdin), O_BINARY);
+#endif
 	}
 
 	if (fgetc(in) != 'P')
@@ -164,7 +187,7 @@ main(int argc, char* argv[])
 		if (c == '#') {
 			do {
 			    c = fgetc(in);
-			} while(!strchr("\r\n", c) || feof(in));
+			} while(!(strchr("\r\n", c) || feof(in)));
 			continue;
 		}
 
@@ -212,7 +235,8 @@ main(int argc, char* argv[])
 	}
 	switch (bpp) {
 		case 1:
-			linebytes = (spp * w + (8 - 1)) / 8;
+			/* if round-up overflows, result will be zero, OK */
+			linebytes = (multiply_ms(spp, w) + (8 - 1)) / 8;
 			if (rowsperstrip == (uint32) -1) {
 				TIFFSetField(out, TIFFTAG_ROWSPERSTRIP, h);
 			} else {
@@ -221,15 +245,31 @@ main(int argc, char* argv[])
 			}
 			break;
 		case 8:
-			linebytes = spp * w;
+			linebytes = multiply_ms(spp, w);
 			TIFFSetField(out, TIFFTAG_ROWSPERSTRIP,
 			    TIFFDefaultStripSize(out, rowsperstrip));
 			break;
 	}
-	if (TIFFScanlineSize(out) > linebytes)
+	if (linebytes == 0) {
+		fprintf(stderr, "%s: scanline size overflow\n", infile);
+		(void) TIFFClose(out);
+		exit(-2);					
+	}
+	scanline_size = TIFFScanlineSize(out);
+	if (scanline_size == 0) {
+		/* overflow - TIFFScanlineSize already printed a message */
+		(void) TIFFClose(out);
+		exit(-2);					
+	}
+	if (scanline_size < linebytes)
 		buf = (unsigned char *)_TIFFmalloc(linebytes);
 	else
-		buf = (unsigned char *)_TIFFmalloc(TIFFScanlineSize(out));
+		buf = (unsigned char *)_TIFFmalloc(scanline_size);
+	if (buf == NULL) {
+		fprintf(stderr, "%s: Not enough memory\n", infile);
+		(void) TIFFClose(out);
+		exit(-2);
+	}
 	if (resolution > 0) {
 		TIFFSetField(out, TIFFTAG_XRESOLUTION, resolution);
 		TIFFSetField(out, TIFFTAG_YRESOLUTION, resolution);
@@ -348,3 +388,10 @@ usage(void)
 }
 
 /* vim: set ts=8 sts=8 sw=8 noet: */
+/*
+ * Local Variables:
+ * mode: c
+ * c-basic-offset: 8
+ * fill-column: 78
+ * End:
+ */

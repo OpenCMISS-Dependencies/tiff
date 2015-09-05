@@ -41,6 +41,7 @@ dist_man1_MANS = \
 	tiff2rgba.1 \
 	tiffcmp.1 \
 	tiffcp.1 \
+	tiffcrop.1 \
 	tiffdither.1 \
 	tiffdump.1 \
 	tiffgt.1 \
@@ -58,6 +59,12 @@ dist_man3_MANS = \
 	TIFFcolor.3tiff \
 	TIFFDataWidth.3tiff \
 	TIFFError.3tiff \
+	TIFFFieldDataType.3tiff \
+	TIFFFieldName.3tiff \
+	TIFFFieldPassCount.3tiff \
+	TIFFFieldReadCount.3tiff \
+	TIFFFieldTag.3tiff \
+	TIFFFieldWriteCount.3tiff \
 	TIFFFlush.3tiff \
 	TIFFGetField.3tiff \
 	TIFFmemory.3tiff \
@@ -89,3 +96,6 @@ dist_man3_MANS = \
 	TIFFWriteRawTile.3tiff \
 	TIFFWriteScanline.3tiff \
 	TIFFWriteTile.3tiff
+
+EXTRA_DIST = \
+	CMakeLists.txt
