@@ -174,11 +174,11 @@ if(cxx)
 
   add_library(tiffxx_static STATIC ${tiffxx_SOURCES} ${tiffxx_HEADERS})
   target_link_libraries(tiffxx_static tiff_staticport)
- if (NOT WIN32)
+  #if (NOT WIN32)
     # Windows static and DLL import libraries both use .lib so the
     # static lib can't use the same name as the DLL
     set_target_properties(tiffxx_static PROPERTIES OUTPUT_NAME tiffxx)
-  endif()
+  #endif()
 
   install(TARGETS tiffxx tiffxx_static
           EXPORT tiff-config
