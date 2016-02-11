@@ -122,9 +122,12 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${TIFF_INCLUDES}
                     ${PROJECT_SOURCE_DIR}/contrib/pds/)
 
-add_library(tiff SHARED ${tiff_SOURCES} ${tiff_HEADERS} ${nodist_tiff_HEADERS}
+add_library(tiff ${tiff_SOURCES} ${tiff_HEADERS} ${nodist_tiff_HEADERS}
             ${tiff_port_SOURCES} libtiff.def ${contrib_pds})
 target_link_libraries(tiff ${TIFF_LIBRARY_DEPS})
+if (NOT BUILD_SHARED_LIBS)
+  target_link_libraries(tiff port)
+endif()
 set_target_properties(tiff PROPERTIES SOVERSION ${SO_COMPATVERSION})
 if(NOT CYGWIN)
     # This property causes shared libraries on Linux to have the full version
@@ -138,15 +141,7 @@ if(HAVE_LD_VERSION_SCRIPT)
                         "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/libtiff.map")
 endif()
 
-add_library(tiff_static STATIC ${tiff_SOURCES} ${tiff_HEADERS})
-target_link_libraries(tiff_static ${TIFF_LIBRARY_DEPS} port)
-if (NOT WIN32)
-  # Windows static and DLL import libraries both use .lib so the
-  # static lib can't use the same name as the DLL
-  set_target_properties(tiff_static PROPERTIES OUTPUT_NAME tiff)
-endif()
-
-install(TARGETS tiff tiff_static
+install(TARGETS tiff
         EXPORT tiff-config
         RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
@@ -157,8 +152,11 @@ install(FILES ${tiff_HEADERS} ${nodist_tiff_HEADERS}
         DESTINATION "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
 
 if(cxx)
-  add_library(tiffxx SHARED ${tiffxx_SOURCES} ${tiffxx_HEADERS})
+  add_library(tiffxx ${tiffxx_SOURCES} ${tiffxx_HEADERS})
   target_link_libraries(tiffxx tiff)
+  if (NOT BUILD_SHARED_LIBS)
+    target_link_libraries(tiffxx port)
+  endif()
   set_target_properties(tiffxx PROPERTIES SOVERSION ${SO_COMPATVERSION})
   if(NOT CYGWIN)
     # This property causes shared libraries on Linux to have the full version
@@ -172,15 +170,7 @@ if(cxx)
                           "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/libtiffxx.map")
   endif()
 
-  add_library(tiffxx_static STATIC ${tiffxx_SOURCES} ${tiffxx_HEADERS})
-  target_link_libraries(tiffxx_static tiff_staticport)
-  #if (NOT WIN32)
-    # Windows static and DLL import libraries both use .lib so the
-    # static lib can't use the same name as the DLL
-    set_target_properties(tiffxx_static PROPERTIES OUTPUT_NAME tiffxx)
-  #endif()
-
-  install(TARGETS tiffxx tiffxx_static
+  install(TARGETS tiffxx
           EXPORT tiff-config
           RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
           LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
