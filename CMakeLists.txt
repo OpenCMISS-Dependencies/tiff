@@ -426,7 +426,7 @@ if (UNIX OR MINGW)
 endif()
 
 # Documentation install directory (default to cmake project docdir)
-set(LIBTIFF_DOCDIR "${CMAKE_INSTALL_FULL_DOCDIR}")
+set(LIBTIFF_DOCDIR share/doc/tiff)
 
 # Options to enable and disable internal codecs
 
@@ -619,12 +619,12 @@ endif()
 # Generate pkg-config file
 set(prefix "${CMAKE_INSTALL_PREFIX}")
 set(exec_prefix "${CMAKE_INSTALL_PREFIX}")
-set(libdir "${CMAKE_INSTALL_FULL_LIBDIR}")
-set(includedir "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
+set(libdir "${CMAKE_INSTALL_PREFIX}/lib")
+set(includedir "${CMAKE_INSTALL_PREFIX}/include")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libtiff-4.pc.in
-               ${CMAKE_CURRENT_BINARY_DIR}/libtiff-4.pc)
+               ${CMAKE_CURRENT_BINARY_DIR}/libtiff-4.pc)               
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libtiff-4.pc
-        DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig")
+        DESTINATION "lib/pkgconfig")
 
 # Includes used by libtiff (and tests)
 if(JPEG12_INCLUDE_DIR)
