@@ -717,10 +717,10 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/tiff-config-dependencies.cmake
 	"set(${PROJECT_NAME}_IMPORT_PREFIX \${_IMPORT_PREFIX})\r\n"
 )
 if(ZLIB_FOUND)
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/tiff-config-dependencies.cmake "find_dependency(ZLIB)\r\n")
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/tiff-config-dependencies.cmake "set(ZLIB_FIND_SYSTEM ${ZLIB_FIND_SYSTEM})\r\nfind_dependency(ZLIB)\r\n")
 endif()
 if(JPEG_FOUND)
-    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/tiff-config-dependencies.cmake "find_dependency(JPEG)\r\n")
+    file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/tiff-config-dependencies.cmake "set(JPEG_FIND_SYSTEM ${JPEG_FIND_SYSTEM})\r\nfind_dependency(JPEG)\r\n")
 endif()
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/tiff-config-dependencies.cmake "set(_IMPORT_PREFIX \${${PROJECT_NAME}_IMPORT_PREFIX})")    
 install(
