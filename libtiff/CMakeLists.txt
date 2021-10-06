@@ -129,6 +129,10 @@ if (NOT BUILD_SHARED_LIBS)
   target_link_libraries(tiff port)
 endif()
 set_target_properties(tiff PROPERTIES SOVERSION ${SO_COMPATVERSION})
+if (ENABLE_PIC)
+    set_target_properties(tiff PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif()
+
 if(NOT CYGWIN)
     # This property causes shared libraries on Linux to have the full version
     # encoded into their final filename.  We disable this on Cygwin because
